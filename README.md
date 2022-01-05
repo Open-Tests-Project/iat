@@ -1,2 +1,2 @@
 # iat
-Implicit Association Test web implementation
+Implicit Association Test [webcomponent](https://www.webcomponents.org/) implementation
