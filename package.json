@@ -1,0 +1,8 @@
+{
+  "name": "iat",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "repository": "git@github.com:Open-Tests-Project/iat.git",
+  "author": "Simone Sacchi <zsimolabs@gmail.com>",
+  "license": "MIT"
+}
