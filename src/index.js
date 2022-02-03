@@ -6,6 +6,7 @@
 
 var template = document.createElement("template");
 template.innerHTML = require("./template")();
+var Machine = require("./machine")
 
 class IAT extends HTMLElement {
     constructor() {
@@ -14,10 +15,24 @@ class IAT extends HTMLElement {
         this._shadowRoot = this.attachShadow({ mode: "open" });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.container = this._shadowRoot.querySelector("div");
+        this.instruction = this.container.querySelector(".instruction");
         this.button = this.container.querySelector("button");
         this.button.addEventListener("click", function () {
-            send("START");
-        })
+            console.log(this.state);
+            var context = this.state.context || {};
+            if (context.block) {
+                this.machineService.send("NEXT");
+            } else {
+                this.machineService.send("START");
+            }
+
+        }.bind(this));
+        this.state = {};
+        var machineConfig = {};
+        this.machineService = Machine(machineConfig, function (state) {
+            this.state = state;
+            this.render(state);
+        }.bind(this));
 
     }
 
@@ -52,112 +67,28 @@ class IAT extends HTMLElement {
 
 
     render() {
+        var context = this.state.context || {};
         var options = this.options;
-        this.button.innerText = options.start_button;
+
+        if (context.block) {
+            this.button.innerText = options.continue_button;
+        } else {
+            this.button.innerText = options.start_button;
+        }
+
+
+        // if (this.state.value === "instruction") {
+        //     this.instruction.innerHTML = context.blocks[context.block - 1];
+        // } else {
+        //     this.instruction.innerHTML = "running";
+        // }
+
+        console.log(this.state.value)
+
+
     }
 }
 
 module.exports = IAT;
 
 customElements.define("implicit-association-test", IAT);
-
-// ========================
-// const machine = {
-//     initial: 'idle',
-//     states: {
-//         idle: {
-//             on: {
-//                 CLICK: 'active',
-//             },
-//         },
-//         active: {
-//             on: {
-//                 CLICK: 'idle',
-//             },
-//         },
-//     },
-// };
-// let currentState = machine.initial;
-// function transition(state, event) {
-//     // const nextState = machine.states[state].on?.[event] || state;
-//     if (machine.states.hasOwnProperty(state) && machine.states[state].on.hasOwnProperty(event)) {
-//         return machine.states[state].on[event];
-//     }
-//     return state;
-// }
-//
-// function send(event) {
-//     currentState = transition(currentState, event);
-//     console.log(currentState);
-// }
-
-
-const machine = {
-    initial: 'idle',
-    context: {
-        block: 0,
-        blocks: [
-
-        ],
-        start_button: "Start"
-    },
-    states: {
-        idle: {
-            on: {
-                START: {
-                    target: 'instruction',
-                    action: function (context, event) {
-                        return {
-                            block: context.block + 1
-                        };
-                    }
-                },
-            },
-        },
-        instruction: {
-            on: {
-                NEXT: {
-                    target: 'running',
-                    action: function (context, event) {
-                        return context;
-                    }
-                },
-            },
-        },
-        running: {
-            on: {
-                NEXT: {
-                    target: 'instruction',
-                    action: function (context, event) {
-                        return {
-                            block: context.block + 1
-                        };
-                    }
-                },
-            },
-        },
-    }
-};
-var currentState = {
-    value: machine.initial,
-    context: machine.context
-};
-
-function transition(state, event) {
-    if (machine.states.hasOwnProperty(state.value) && machine.states[state.value].on.hasOwnProperty(event)) {
-        return {
-            value: machine.states[state.value].on[event].target,
-            context: machine.states[state.value].on[event].action(state.context, event)
-        };
-    }
-    return state;
-}
-
-function send(event) {
-    currentState = transition(currentState, event);
-    console.log(currentState);
-}
-
-// send('START');
-// send('NEXT');
-// send('NEXT');

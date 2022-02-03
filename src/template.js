@@ -10,6 +10,8 @@ module.exports = function (theme) {
             </style>
             <div>
                 iat
+                
+                <div class="instruction"></div>
                 <button></button>
             </div>  
         `;
