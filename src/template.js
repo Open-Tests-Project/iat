@@ -9,7 +9,8 @@ module.exports = function (theme) {
                 }
             </style>
             <div>
-                ciao
+                iat
+                <button></button>
             </div>  
         `;
 };
